@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+  <p><a href="{{ url_for('index') }}">&larr; Back to shop</a></p>
+  <div class="card">
+    <h2 style="margin-top:0;">{{ order.product_name }}</h2>
+    <p class="price">${{ "%.2f"|format(order.amount) }}</p>
+    <p>Order: <code>{{ order.id }}</code></p>
+    <p>Status: <span id="status-pill" class="status-pill status-{{ order.status }}">{{ order.status }}</span></p>
+
+    <div id="pending-block" {% if order.status == "PAID" %}style="display:none;"{% endif %}>
+      <p>Scan this QR code with your phone to open the banking app and pay:</p>
+      <img src="{{ url_for('order_qr', order_id=order.id) }}" alt="Payment QR code" width="220" height="220">
+      <p style="font-size:.85rem; color:#8a7f6d;">
+        This page updates automatically once payment is confirmed.
+      </p>
+    </div>
+
+    <div id="paid-block" {% if order.status != "PAID" %}style="display:none;"{% endif %}>
+      <p>&#10003; Payment received. Thanks for your order!</p>
+    </div>
+  </div>
+
+  <script>
+    (function poll() {
+      const orderId = {{ order.id | tojson }};
+      if (document.getElementById('status-pill').textContent.trim() === 'PAID') return;
+      fetch(`/api/orders/${orderId}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.status === 'PAID') {
+            document.getElementById('status-pill').textContent = 'PAID';
+            document.getElementById('status-pill').className = 'status-pill status-PAID';
+            document.getElementById('pending-block').style.display = 'none';
+            document.getElementById('paid-block').style.display = 'block';
+          } else {
+            setTimeout(poll, 2000);
+          }
+        })
+        .catch(() => setTimeout(poll, 3000));
+    })();
+  </script>
+{% endblock %}
