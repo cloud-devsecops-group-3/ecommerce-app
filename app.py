@@ -80,18 +80,45 @@ def index():
 #             order_id=order["id"]
 #         )
 #     )
+# @app.route("/buy/<int:product_id>", methods=["POST"])
+# def buy():
+
+#     global next_order_id
+
+#     product = next(
+#         (p for p in products if p["id"] == product_id),
+#         None
+#     )
+
+#     if product is None:
+#         abort(404)
+
+#     order = {
+#         "id": next_order_id,
+#         "product": product,
+#         "amount": product["price"],
+#         "status": "PENDING"
+#     }
+
+#     orders[next_order_id] = order
+
+#     next_order_id += 1
+
+#     return redirect(
+#         url_for(
+#             "checkout",
+#             order_id=order["id"]
+#         )
+#     )
 @app.route("/buy/<int:product_id>", methods=["POST"])
-def buy():
+def buy(product_id):
 
-    global next_order_id
-
-    product = next(
-        (p for p in products if p["id"] == product_id),
-        None
-    )
+    product = next((p for p in products if p["id"] == product_id), None)
 
     if product is None:
         abort(404)
+
+    global next_order_id
 
     order = {
         "id": next_order_id,
@@ -102,14 +129,36 @@ def buy():
 
     orders[next_order_id] = order
 
+    # payment_url = (
+    #     "http://127.0.0.1:5000/pay"
+    #     f"?order_id={order['id']}"
+    #     f"&amount={order['amount']:.2f}"
+    #     f"&merchant=pageturn-books"
+    # )
+    # filename = f"order_{order['id']}.png"
+
+    payment_url = (
+        "http://127.0.0.1:5000/pay"
+        f"?order_id=1001"
+        f"&amount={order['amount']:.2f}"
+        f"&merchant=pageturn-books"
+    )
+    filename = f"order_1001.png"
+
+
+    filepath = os.path.join(QR_FOLDER, filename)
+
+    qrcode.make(payment_url).save(filepath)
+
     next_order_id += 1
 
-    return redirect(
-        url_for(
-            "checkout",
-            order_id=order["id"]
-        )
-    )
+    return jsonify({
+        "success": True,
+        "product": product["name"],
+        "amount": order["amount"],
+        "qr": f"/static/qr/{filename}",
+        "payment_url": payment_url
+    })
 
 
 @app.route("/checkout/<int:order_id>")
