@@ -13,21 +13,25 @@
     }
     header {
       background: var(--accent); color: #fff; padding: 1.2rem 1.5rem;
+      display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap;
     }
     header h1 { margin: 0; font-size: 1.5rem; }
     header p { margin: .2rem 0 0; opacity: .85; font-size: .9rem; }
+    header nav a { color: #fff; text-decoration: none; font-size: .95rem; }
+    header nav a:hover { text-decoration: underline; }
     main { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
     a { color: var(--accent); }
     .card {
       background: #fff; border: 1px solid #e7ded2; border-radius: 10px;
       padding: 1rem 1.25rem; margin-bottom: 1rem;
     }
-    button {
+    button, input[type=submit] {
       background: var(--accent); color: #fff; border: none;
       padding: .55rem 1.1rem; border-radius: 6px; font-size: 1rem;
       cursor: pointer; font-family: inherit;
     }
-    button:hover { opacity: .9; }
+    button.secondary { background: #cbb99a; color: #3a2f20; }
+    button:hover, input[type=submit]:hover { opacity: .9; }
     .price { font-weight: bold; color: var(--accent); }
     .status-pill {
       display: inline-block; padding: .25rem .7rem; border-radius: 999px;
@@ -35,13 +39,22 @@
     }
     .status-PENDING { background: #fdecc8; color: #8a5a00; }
     .status-PAID { background: #d9f2df; color: #1e7a3c; }
+    .status-FAILED { background: #f6d6d6; color: #9a2b2b; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: .4rem 0; border-bottom: 1px solid #eee1cf; }
+    input[type=number] { width: 4rem; padding: .3rem; }
     footer { text-align: center; color: #9a8f7d; font-size: .8rem; padding: 2rem 0; }
   </style>
 </head>
 <body>
   <header>
-    <h1><a href="{{ url_for('index') }}" style="color:#fff; text-decoration:none;">{{ shop_name }}</a></h1>
-    <p>Novels &middot; Notebooks &middot; Textbooks &middot; Comics &middot; Pens</p>
+    <div>
+      <h1><a href="{{ url_for('catalog.index') }}" style="color:#fff; text-decoration:none;">{{ shop_name }}</a></h1>
+      <p>Novels &middot; Notebooks &middot; Textbooks &middot; Comics &middot; Pens</p>
+    </div>
+    <nav>
+      <a href="{{ url_for('cart.view') }}">Cart{% if cart_count %} ({{ cart_count }}){% endif %}</a>
+    </nav>
   </header>
   <main>
     {% block content %}{% endblock %}

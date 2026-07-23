@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+  <p><a href="{{ url_for('catalog.index') }}">&larr; Continue browsing</a></p>
+  <h2>Your cart</h2>
+
+  {% if not items %}
+    <div class="card"><p>Your cart is empty.</p></div>
+  {% else %}
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>Item</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for entry in items %}
+            <tr>
+              <td>{{ entry.product.name }}</td>
+              <td>${{ "%.2f"|format(entry.product.price) }}</td>
+              <td>
+                <form method="post" action="{{ url_for('cart.update', product_id=entry.product.id) }}" style="display:flex; gap:.4rem;">
+                  <input type="number" name="quantity" value="{{ entry.quantity }}" min="0" max="20">
+                  <button type="submit" class="secondary">Update</button>
+                </form>
+              </td>
+              <td>${{ "%.2f"|format(entry.subtotal) }}</td>
+              <td>
+                <form method="post" action="{{ url_for('cart.remove', product_id=entry.product.id) }}">
+                  <button type="submit" class="secondary">Remove</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p style="text-align:right; margin-top:1rem;">
+        Total: <span class="price">${{ "%.2f"|format(total) }}</span>
+      </p>
+      <p style="text-align:right;">
+        <a href="{{ url_for('orders.checkout') }}" style="display:inline-block; background:var(--accent); color:#fff; padding:.55rem 1.1rem; border-radius:6px; text-decoration:none;">Proceed to Checkout</a>
+      </p>
+    </div>
+  {% endif %}
+{% endblock %}
