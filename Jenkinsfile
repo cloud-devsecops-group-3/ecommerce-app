@@ -15,6 +15,8 @@ pipeline {
         DB_PASSWORD = 'ecompass'
         DB_ROOT_PASSWORD = 'root123'
 
+        NGINX_CONTAINER = 'nginx'
+
         BANK_PUBLIC_BASE = 'http://54-211-30-30.nip.io'
         MERCHANT_ACCOUNT = 'pageturn-books'
     }
@@ -40,8 +42,15 @@ pipeline {
                 sh '''
                 if [ -d tests ]; then
                     echo "Tests folder found. Running tests..."
-                    pip3 install -r requirements.txt
-                    pip3 install pytest
+
+                    rm -rf venv
+                    python3 -m venv venv
+                    . venv/bin/activate
+
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                    pip install pytest
+
                     pytest
                 else
                     echo "No tests folder found. Skipping tests."
@@ -89,7 +98,7 @@ pipeline {
             }
         }
 
-        stage('Deploy Ecommerce App') {
+        stage('Deploy Ecommerce App with Nginx') {
             steps {
                 sh '''
                 echo "Deploying ecommerce app on ecommerce server..."
@@ -123,15 +132,14 @@ pipeline {
                     echo 'Loading ecommerce Docker image...' &&
                     docker load -i $TAR_NAME &&
 
-                    echo 'Stopping old ecommerce container if existing...' &&
+                    echo 'Stopping old ecommerce app container if existing...' &&
                     docker stop $CONTAINER_NAME || true &&
                     docker rm $CONTAINER_NAME || true &&
 
-                    echo 'Starting new ecommerce app container...' &&
+                    echo 'Starting new ecommerce app container internally on port 5000...' &&
                     docker run -d \
                         --name $CONTAINER_NAME \
                         --network ecommerce-net \
-                        -p 80:5000 \
                         -e DB_HOST=$DB_CONTAINER \
                         -e DB_NAME=$DB_NAME \
                         -e DB_USER=$DB_USER \
@@ -139,6 +147,36 @@ pipeline {
                         -e BANK_PUBLIC_BASE=$BANK_PUBLIC_BASE \
                         -e MERCHANT_ACCOUNT=$MERCHANT_ACCOUNT \
                         $IMAGE_NAME:latest &&
+
+                    echo 'Creating nginx.conf...' &&
+                    cat > nginx.conf <<'NGINX'
+events {}
+
+http {
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://ecommerce-app:5000;
+            proxy_set_header Host \\$host;
+            proxy_set_header X-Real-IP \\$remote_addr;
+            proxy_set_header X-Forwarded-For \\$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto \\$scheme;
+        }
+    }
+}
+NGINX
+
+                    echo 'Restarting nginx container...' &&
+                    docker stop $NGINX_CONTAINER || true &&
+                    docker rm $NGINX_CONTAINER || true &&
+
+                    docker run -d \
+                        --name $NGINX_CONTAINER \
+                        --network ecommerce-net \
+                        -p 80:80 \
+                        -v $REMOTE_DIR/nginx.conf:/etc/nginx/nginx.conf:ro \
+                        nginx:alpine &&
 
                     echo 'Current running containers:' &&
                     docker ps
@@ -168,7 +206,7 @@ pipeline {
 
     post {
         success {
-            echo 'Ecommerce app deployed successfully.'
+            echo 'Ecommerce app deployed successfully through nginx port 80.'
         }
 
         failure {
@@ -180,6 +218,8 @@ pipeline {
                 docker ps -a &&
                 echo '--- Ecommerce app logs ---' &&
                 docker logs $CONTAINER_NAME || true &&
+                echo '--- Nginx logs ---' &&
+                docker logs $NGINX_CONTAINER || true &&
                 echo '--- Ecommerce MySQL logs ---' &&
                 docker logs $DB_CONTAINER --tail 50 || true
             "
