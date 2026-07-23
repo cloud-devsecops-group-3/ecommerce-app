@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ shop_name }}</title>
+  <style>
+    :root { --accent: #7a4f2b; --bg: #faf7f2; --ink: #2b241c; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Georgia", "Times New Roman", serif;
+      background: var(--bg); color: var(--ink);
+    }
+    header {
+      background: var(--accent); color: #fff; padding: 1.2rem 1.5rem;
+    }
+    header h1 { margin: 0; font-size: 1.5rem; }
+    header p { margin: .2rem 0 0; opacity: .85; font-size: .9rem; }
+    main { max-width: 720px; margin: 0 auto; padding: 1.5rem; }
+    a { color: var(--accent); }
+    .card {
+      background: #fff; border: 1px solid #e7ded2; border-radius: 10px;
+      padding: 1rem 1.25rem; margin-bottom: 1rem;
+    }
+    button {
+      background: var(--accent); color: #fff; border: none;
+      padding: .55rem 1.1rem; border-radius: 6px; font-size: 1rem;
+      cursor: pointer; font-family: inherit;
+    }
+    button:hover { opacity: .9; }
+    .price { font-weight: bold; color: var(--accent); }
+    .status-pill {
+      display: inline-block; padding: .25rem .7rem; border-radius: 999px;
+      font-size: .85rem; font-weight: bold; letter-spacing: .03em;
+    }
+    .status-PENDING { background: #fdecc8; color: #8a5a00; }
+    .status-PAID { background: #d9f2df; color: #1e7a3c; }
+    footer { text-align: center; color: #9a8f7d; font-size: .8rem; padding: 2rem 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="{{ url_for('index') }}" style="color:#fff; text-decoration:none;">{{ shop_name }}</a></h1>
+    <p>Novels &middot; Notebooks &middot; Textbooks &middot; Comics &middot; Pens</p>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer>QR Payment Prototype &mdash; Bookstore MVP</footer>
+</body>
+</html>

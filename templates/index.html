@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Browse books &amp; stationery</h2>
+  {% for product in products %}
+    <div class="card">
+      <h3 style="margin:0 0 .3rem;">{{ product.name }}</h3>
+      <p style="margin:0 0 .5rem; color:#5a5145;">{{ product.description }}</p>
+      <p class="price" style="margin:0 0 .7rem;">${{ "%.2f"|format(product.price) }}</p>
+      <form method="post" action="{{ url_for('buy', product_id=product.id) }}">
+        <button type="submit">Buy</button>
+      </form>
+    </div>
+  {% endfor %}
+{% endblock %}
