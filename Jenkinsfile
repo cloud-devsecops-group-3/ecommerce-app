@@ -17,7 +17,7 @@ pipeline {
         DB_PASSWORD = 'ecompass'
         DB_ROOT_PASSWORD = 'root123'
 
-        BANK_PUBLIC_BASE = 'http://54.211.30.30:5001'
+        BANK_PUBLIC_BASE = 'http://54-211-30-30.nip.io:5001'
         MERCHANT_ACCOUNT = 'pageturn-books'
     }
 
@@ -84,16 +84,19 @@ pipeline {
 
                     docker network create ecommerce-net || true &&
 
-                    docker ps -a --format '{{.Names}}' | grep -w $DB_CONTAINER ||
-                    docker run -d \
-                        --name $DB_CONTAINER \
-                        --network ecommerce-net \
-                        -e MYSQL_ROOT_PASSWORD=$DB_ROOT_PASSWORD \
-                        -e MYSQL_DATABASE=$DB_NAME \
-                        -e MYSQL_USER=$DB_USER \
-                        -e MYSQL_PASSWORD=$DB_PASSWORD \
-                        -v ecommerce_mysql_data:/var/lib/mysql \
-                        mysql:8.0 &&
+                    if ! docker ps -a --format '{{.Names}}' | grep -w $DB_CONTAINER; then
+                        docker run -d \
+                            --name $DB_CONTAINER \
+                            --network ecommerce-net \
+                            -e MYSQL_ROOT_PASSWORD=$DB_ROOT_PASSWORD \
+                            -e MYSQL_DATABASE=$DB_NAME \
+                            -e MYSQL_USER=$DB_USER \
+                            -e MYSQL_PASSWORD=$DB_PASSWORD \
+                            -v ecommerce_mysql_data:/var/lib/mysql \
+                            mysql:8.0
+                    else
+                        docker start $DB_CONTAINER || true
+                    fi &&
 
                     echo 'Waiting for MySQL to initialize...' &&
                     sleep 25 &&
@@ -123,7 +126,7 @@ pipeline {
             steps {
                 sh '''
                 sleep 5
-                curl -f http://98.95.123.28:5000/health
+                curl -f http://98-95-123-28.nip.io:5000/health
                 '''
             }
         }
