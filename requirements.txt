@@ -1,7 +1,5 @@
-Flask
-Flask-SQLAlchemy
-PyMySQL
-python-dotenv
-qrcode
-Pillow
-gunicorn
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+PyMySQL==1.1.1
+requests==2.32.3
+gunicorn==22.0.0

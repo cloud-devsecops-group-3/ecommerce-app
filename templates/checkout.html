@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+  <p><a href="{{ url_for('cart.view') }}">&larr; Back to cart</a></p>
+  <h2>Checkout</h2>
+
+  <div class="card">
+    <table>
+      <thead><tr><th>Item</th><th>Qty</th><th>Subtotal</th></tr></thead>
+      <tbody>
+        {% for entry in items %}
+          <tr>
+            <td>{{ entry.product.name }}</td>
+            <td>{{ entry.quantity }}</td>
+            <td>${{ "%.2f"|format(entry.subtotal) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p style="text-align:right; margin-top:1rem;">
+      Total: <span class="price">${{ "%.2f"|format(total) }}</span>
+    </p>
+    <form method="post" action="{{ url_for('orders.place_order') }}" style="text-align:right;">
+      <button type="submit">Confirm &amp; Get QR</button>
+    </form>
+  </div>
+{% endblock %}

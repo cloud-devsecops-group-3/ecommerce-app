@@ -6,8 +6,9 @@
       <h3 style="margin:0 0 .3rem;">{{ product.name }}</h3>
       <p style="margin:0 0 .5rem; color:#5a5145;">{{ product.description }}</p>
       <p class="price" style="margin:0 0 .7rem;">${{ "%.2f"|format(product.price) }}</p>
-      <form method="post" action="{{ url_for('buy', product_id=product.id) }}">
-        <button type="submit">Buy</button>
+      <form method="post" action="{{ url_for('cart.add', product_id=product.id) }}" style="display:flex; gap:.6rem; align-items:center;">
+        <label>Qty <input type="number" name="quantity" value="1" min="1" max="20"></label>
+        <button type="submit">Add to Cart</button>
       </form>
     </div>
   {% endfor %}
