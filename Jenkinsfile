@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         ECOMMERCE_SERVER = 'ubuntu@98.95.123.28'
-        REMOTE_DIR = '/home/ubuntu/capstone/ecommerce-app'
+        REMOTE_DIR = '/home/ubuntu/qr-prototype'
 
         IMAGE_NAME = 'ecommerce-app'
         CONTAINER_NAME = 'ecommerce-app'
