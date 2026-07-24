@@ -6,6 +6,7 @@ pipeline {
         REMOTE_DIR = '/home/ubuntu/qr-prototype'
 
         IMAGE_NAME = 'ecommerce-app'
+        DOCKERHUB_IMAGE = 'lebaiidesuu/ecommerce-app'
         CONTAINER_NAME = 'ecommerce-app'
         TAR_NAME = 'ecommerce-app.tar'
 
@@ -38,27 +39,27 @@ pipeline {
         }
 
         stage('Run Tests If Available') {
-        steps {
-            sh '''
-            if [ -d tests ]; then
-                echo "Tests folder found. Running tests..."
-    
-                rm -rf venv
-                python3 -m venv venv
-                . venv/bin/activate
-    
-                pip install --upgrade pip
-                pip install -r requirements.txt
-                pip install pytest
-    
-                export PYTHONPATH=$WORKSPACE
-                pytest
-            else
-                echo "No tests folder found. Skipping tests."
-            fi
-            '''
+            steps {
+                sh '''
+                if [ -d tests ]; then
+                    echo "Tests folder found. Running tests..."
+
+                    rm -rf venv
+                    python3 -m venv venv
+                    . venv/bin/activate
+
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                    pip install pytest
+
+                    export PYTHONPATH=$WORKSPACE
+                    pytest
+                else
+                    echo "No tests folder found. Skipping tests."
+                fi
+                '''
+            }
         }
-    }
 
         stage('Build Docker Image') {
             steps {
@@ -66,6 +67,27 @@ pipeline {
                 echo "Building ecommerce Docker image..."
                 docker build -t $IMAGE_NAME:latest .
                 '''
+            }
+        }
+
+        stage('Push Image to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo "Logging in to Docker Hub..."
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                    echo "Tagging ecommerce image..."
+                    docker tag $IMAGE_NAME:latest $DOCKERHUB_IMAGE:latest
+
+                    echo "Pushing ecommerce image to Docker Hub..."
+                    docker push $DOCKERHUB_IMAGE:latest
+                    '''
+                }
             }
         }
 
@@ -207,7 +229,7 @@ NGINX
 
     post {
         success {
-            echo 'Ecommerce app deployed successfully through nginx port 80.'
+            echo 'Ecommerce app deployed successfully and pushed to Docker Hub.'
         }
 
         failure {
