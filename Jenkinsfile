@@ -38,26 +38,27 @@ pipeline {
         }
 
         stage('Run Tests If Available') {
-            steps {
-                sh '''
-                if [ -d tests ]; then
-                    echo "Tests folder found. Running tests..."
-
-                    rm -rf venv
-                    python3 -m venv venv
-                    . venv/bin/activate
-
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                    pip install pytest
-
-                    pytest
-                else
-                    echo "No tests folder found. Skipping tests."
-                fi
-                '''
-            }
+        steps {
+            sh '''
+            if [ -d tests ]; then
+                echo "Tests folder found. Running tests..."
+    
+                rm -rf venv
+                python3 -m venv venv
+                . venv/bin/activate
+    
+                pip install --upgrade pip
+                pip install -r requirements.txt
+                pip install pytest
+    
+                export PYTHONPATH=$WORKSPACE
+                pytest
+            else
+                echo "No tests folder found. Skipping tests."
+            fi
+            '''
         }
+    }
 
         stage('Build Docker Image') {
             steps {
