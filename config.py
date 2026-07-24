@@ -27,7 +27,8 @@ class Config:
     # the old BANK_PUBLIC_BASE, nothing here needs to be phone-reachable,
     # since the bank now returns its own fully-qualified, phone-reachable
     # qr_url in the API response.
-    BANK_API_BASE = os.environ.get("BANK_API_BASE", "http://localhost:5001")
+    BANK_API_BASE = os.environ.get("BANK_API_BASE", "http://54.211.30.30")
+    ECOM_API_BASE = os.environ.get("ECOM_API_BASE", "http://98.95.123.28")
 
     # Seconds to wait for the bank's payment-request API before giving up.
     BANK_API_TIMEOUT = float(os.environ.get("BANK_API_TIMEOUT", "5"))

@@ -70,12 +70,21 @@ def _register_with_bank(order: Order) -> None:
     """Tell the bank a payment is needed and get back its QR. The bank
     owns the transaction record and the QR image from this point on -
     we only store its reference and the URL to display."""
+    base = current_app.config["ECOM_API_BASE"].rstrip("/")
+
+    # payload = {
+    #     "order_id": order.id,
+    #     "amount": str(order.total),
+    #     "merchant_account": order.merchant_account,
+    #     "callback_url": url_for("orders.payment_callback", _external=True),
+    #     "return_url": url_for("orders.order_status", order_id=order.id, _external=True),
+    # }
     payload = {
         "order_id": order.id,
         "amount": str(order.total),
         "merchant_account": order.merchant_account,
-        "callback_url": url_for("orders.payment_callback", _external=True),
-        "return_url": url_for("orders.order_status", order_id=order.id, _external=True),
+        "callback_url": f"{base}/api/payment/callback",
+        "return_url": f"{base}/order/{order.id}",
     }
     try:
         resp = requests.post(
