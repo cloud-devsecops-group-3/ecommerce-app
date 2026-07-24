@@ -18,7 +18,8 @@ pipeline {
 
         NGINX_CONTAINER = 'nginx'
 
-        BANK_PUBLIC_BASE = 'http://54-211-30-30.nip.io'
+        BANK_API_BASE = 'http://54-211-30-30.nip.io'
+        ECOM_API_BASE = 'http://98-95-123-28.nip.io'
         MERCHANT_ACCOUNT = 'pageturn-books'
     }
 
@@ -167,7 +168,8 @@ pipeline {
                         -e DB_NAME=$DB_NAME \
                         -e DB_USER=$DB_USER \
                         -e DB_PASSWORD=$DB_PASSWORD \
-                        -e BANK_PUBLIC_BASE=$BANK_PUBLIC_BASE \
+                        -e BANK_API_BASE=$BANK_API_BASE \
+                        -e ECOM_API_BASE=$ECOM_API_BASE \
                         -e MERCHANT_ACCOUNT=$MERCHANT_ACCOUNT \
                         $IMAGE_NAME:latest &&
 
